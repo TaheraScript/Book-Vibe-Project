@@ -5,7 +5,7 @@ import { IBook } from '@/type/books.type';
 export const getBooks = async (): Promise<IBook[]> => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
     return await res.json();
   } catch (error) {
