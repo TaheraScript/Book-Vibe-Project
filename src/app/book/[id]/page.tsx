@@ -2,26 +2,34 @@ import ReadButton from "@/components/bookDetails/ReadButton"
 import WishListButton from "@/components/bookDetails/WishListButton"
 import { IBook } from "@/type/books.type"
 import Image from "next/image"
+import { notFound } from "next/navigation" // ADDED: used to show a proper 404 when book isn't found
 
 interface IBookDetailsPageProp{
     params :Promise<{
         id: string
     }>
 }
-const getBooks =async () =>{
-  try{
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`)
-    return await res.json()
-    }catch(error){
-      console.error("Error fetching books data:", error)
-      return []
-    }
-} 
+export const getBooks = async (): Promise<IBook[]> => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
+      cache: 'no-store',
+    });
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching books data:", error);
+    return [];
+  }
+};
 
 const bookDetailsPage = async({params} : IBookDetailsPageProp) => {
    const {id} = await params
    const booksData =await getBooks()
    const book = booksData.find((book : IBook) =>book.bookId ===Number(id ))
+
+   if (!book) {           // ADDED: if no matching book is found, `book` would be undefined
+     notFound()           // ADDED: shows Next.js's 404 page and stops execution here.
+   }                       // ADDED: TypeScript now knows `book` is definitely IBook below this line
+
     return (
        
 <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-10">
